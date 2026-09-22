@@ -216,3 +216,15 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Fannie Mae data — license prohibits redistribution
+data/
+
+# Local environment
+.venv/
+.databricks/
+logs/
+target/
+dbt_packages/
+.user.yml
+.env
