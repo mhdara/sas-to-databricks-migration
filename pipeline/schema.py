@@ -1,0 +1,143 @@
+# Databricks notebook source
+"""Explicit schema for the Fannie Mae Single-Family Loan Performance files.
+
+Source: Fannie Mae "SF Glossary & File Layout"
+https://capitalmarkets.fanniemae.com/resources/file/credit-risk/pdf/crt-file-layout-and-glossary.pdf
+Column names and order are transcribed in docs/file_layout.md.
+
+Files are pipe-delimited with no header row, so columns are bound by ordinal
+position. The published layout defines 114 columns, but our files contain 113:
+column 114 (Origination VantageScore 4.0) is absent.
+
+Every field is read as StringType. Casting happens in Silver: raw files contain
+malformed values that an enforced numeric schema would silently turn into nulls,
+and every row must be accounted for (bad rows go to quarantine, not to null).
+"""
+
+from pyspark.sql.types import StringType, StructField, StructType
+
+# COMMAND ----------
+
+COLUMN_COUNT = 113
+
+LOAN_PERFORMANCE_COLUMNS = [
+    "reference_pool_id",
+    "loan_identifier",
+    "monthly_reporting_period",
+    "channel",
+    "seller_name",
+    "servicer_name",
+    "master_servicer",
+    "original_interest_rate",
+    "current_interest_rate",
+    "original_upb",
+    "upb_at_issuance",
+    "current_actual_upb",
+    "original_loan_term",
+    "origination_date",
+    "first_payment_date",
+    "loan_age",
+    "remaining_months_to_legal_maturity",
+    "remaining_months_to_maturity",
+    "maturity_date",
+    "original_ltv",
+    "original_cltv",
+    "number_of_borrowers",
+    "debt_to_income",
+    "borrower_credit_score_at_origination",
+    "co_borrower_credit_score_at_origination",
+    "first_time_home_buyer_indicator",
+    "loan_purpose",
+    "property_type",
+    "number_of_units",
+    "occupancy_status",
+    "property_state",
+    "msa",
+    "zip_code_short",
+    "mortgage_insurance_percentage",
+    "amortization_type",
+    "prepayment_penalty_indicator",
+    "interest_only_loan_indicator",
+    "interest_only_first_principal_and_interest_payment_date",
+    "months_to_amortization",
+    "current_loan_delinquency_status",
+    "loan_payment_history",
+    "modification_flag",
+    "mortgage_insurance_cancellation_indicator",
+    "zero_balance_code",
+    "zero_balance_effective_date",
+    "upb_at_the_time_of_removal",
+    "repurchase_date",
+    "scheduled_principal_current",
+    "total_principal_current",
+    "unscheduled_principal_current",
+    "last_paid_installment_date",
+    "foreclosure_date",
+    "disposition_date",
+    "foreclosure_costs",
+    "property_preservation_and_repair_costs",
+    "asset_recovery_costs",
+    "miscellaneous_holding_expenses_and_credits",
+    "associated_taxes_for_holding_property",
+    "net_sales_proceeds",
+    "credit_enhancement_proceeds",
+    "repurchase_make_whole_proceeds",
+    "other_foreclosure_proceeds",
+    "modification_related_non_interest_bearing_upb",
+    "principal_forgiveness_amount",
+    "original_list_start_date",
+    "original_list_price",
+    "current_list_start_date",
+    "current_list_price",
+    "borrower_credit_score_at_issuance",
+    "co_borrower_credit_score_at_issuance",
+    "borrower_credit_score_current",
+    "co_borrower_credit_score_current",
+    "mortgage_insurance_type",
+    "servicing_activity_indicator",
+    "current_period_modification_loss_amount",
+    "cumulative_modification_loss_amount",
+    "current_period_credit_event_net_gain_or_loss",
+    "cumulative_credit_event_net_gain_or_loss",
+    "special_eligibility_program",
+    "foreclosure_principal_write_off_amount",
+    "relocation_mortgage_indicator",
+    "zero_balance_code_change_date",
+    "loan_holdback_indicator",
+    "loan_holdback_effective_date",
+    "delinquent_accrued_interest",
+    "property_valuation_method",
+    "high_balance_loan_indicator",
+    "arm_initial_fixed_rate_period_le_5_yr_indicator",
+    "arm_product_type",
+    "initial_fixed_rate_period",
+    "interest_rate_adjustment_frequency",
+    "next_interest_rate_adjustment_date",
+    "next_payment_change_date",
+    "index",
+    "arm_cap_structure",
+    "initial_interest_rate_cap_up_percent",
+    "periodic_interest_rate_cap_up_percent",
+    "lifetime_interest_rate_cap_up_percent",
+    "mortgage_margin",
+    "arm_balloon_indicator",
+    "arm_plan_number",
+    "borrower_assistance_plan",
+    "hltv_refinance_option_indicator",
+    "deal_name",
+    "repurchase_make_whole_proceeds_flag",
+    "alternative_delinquency_resolution",
+    "alternative_delinquency_resolution_count",
+    "total_deferral_amount",
+    "payment_deferral_modification_event_indicator",
+    "interest_bearing_upb",
+    "origination_classic_fico",
+    "issuance_classic_fico",
+    "current_classic_fico",
+]
+
+LOAN_PERFORMANCE_SCHEMA = StructType(
+    [StructField(name, StringType(), True) for name in LOAN_PERFORMANCE_COLUMNS]
+)
+
+assert len(LOAN_PERFORMANCE_SCHEMA.fields) == COLUMN_COUNT
